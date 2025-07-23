@@ -1,3 +1,4 @@
+// src/prisma/prisma.service.ts
 import {
     INestApplication,
     Injectable,
@@ -10,23 +11,26 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaService
     extends PrismaClient
     implements OnModuleInit, OnModuleDestroy {
+    constructor() {
+        super(); // Chama o construtor da classe pai (PrismaClient)
+    }
+
     async onModuleInit() {
-        // Conecta-se ao banco de dados quando o módulo é inicializado
         await this.$connect();
         console.log('PrismaService conectado ao banco de dados.');
     }
 
     async onModuleDestroy() {
-        // Desconecta-se do banco de dados quando o módulo é destruído
         await this.$disconnect();
         console.log('PrismaService desconectado do banco de dados.');
     }
 
-    // Método opcional para habilitar o "shutdown hooks"
-    // Isso garante que o Prisma se desconecte mesmo se a aplicação for forçada a fechar
+    // Novo método para ativar os shutdown hooks, a ser chamado em main.ts
     async enableShutdownHooks(app: INestApplication) {
-        this.$on('beforeExit', async () => {
-            await app.close();
+        // Registra um hook para o evento 'beforeExit' do Node.js
+        // Isso garante que o NestJS desligue graciosamente o PrismaClient antes de encerrar
+        process.on('beforeExit', async () => {
+            await app.close(); // Fecha a aplicação NestJS, o que acionará o onModuleDestroy do PrismaService
         });
     }
 }
