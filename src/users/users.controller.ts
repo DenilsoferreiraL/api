@@ -1,4 +1,3 @@
-// src/users/users.controller.ts
 import {
   Controller,
   Get,
@@ -7,16 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
-@Controller('users') // O prefixo 'users' significa que as rotas serão /users, /users/:id, etc.
+@Controller('users') 
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  //Usando o ValidationPipe para validar os dados de entrada
+  //Isso garante que o DTO CreateUserDto seja validado antes de ser processado
   @Post()
-  async create(@Body() createUserDto: any) {
-    // Usaremos DTOs reais aqui depois
+  @UsePipes(new ValidationPipe())
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
