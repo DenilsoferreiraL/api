@@ -1,54 +1,66 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service'; // Importe o PrismaService
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Role } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-    // Este método será usado para criar um novo usuário no banco de dados
-    // Por enquanto, apenas o esqueleto. Adicionaremos a lógica de criptografia de senha e DTOs depois.
-    async create(data: any) {
-        // Exemplo básico:
-        return this.prisma.usuario.create({
-            data: {
-                ...data,
-                // Role padrão para novos usuários
-                role: 'CLIENTE',
-            },
-        });
+  //Método para criar um usuário e verificar se o email já existe
+  //Se existir, lança um erro
+  //Se não existir, cria o usuário com a senha criptografada
+  //E define o role como CLIENTE se não for fornecido
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.prisma.usuario.findFirst({
+      where: {email: createUserDto.email},
+    })
+
+    if(existingUser){
+      throw new Error('Usuário já existe com este email.');
     }
 
-    // Este método será usado para buscar um usuário por email (útil para login)
-    async findOneByEmail(email: string) {
-        return this.prisma.usuario.findUnique({
-            where: { email },
-        });
-    }
+    const hashedPassword = await bcrypt.hash(createUserDto.senha,10)
 
-    // Este método será usado para buscar todos os usuários
-    async findAll() {
-        return this.prisma.usuario.findMany();
-    }
+    const role = createUserDto.role || Role.CLIENTE;
 
-    // Este método será usado para buscar um usuário por ID
-    async findOneById(id: string) {
-        return this.prisma.usuario.findUnique({
-            where: { id },
-        });
-    }
+    return this.prisma.usuario.create({
+      data: {
+        nome: createUserDto.nome,
+        email: createUserDto.email,
+        senha: hashedPassword,
+        role: role
+      },
+    });
+  }
 
-    // Este método será usado para atualizar um usuário
-    async update(id: string, data: any) {
-        return this.prisma.usuario.update({
-            where: { id },
-            data,
-        });
-    }
+  async findOneByEmail(email: string) {
+    return this.prisma.usuario.findUnique({
+      where: { email },
+    });
+  }
 
-    // Este método será usado para deletar um usuário
-    async remove(id: string) {
-        return this.prisma.usuario.delete({
-            where: { id },
-        });
-    }
+  async findAll() {
+    return this.prisma.usuario.findMany();
+  }
+
+  async findOneById(id: string) {
+    return this.prisma.usuario.findUnique({
+      where: { id },
+    });
+  }
+
+  async update(id: string, data: any) {
+    return this.prisma.usuario.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.usuario.delete({
+      where: { id },
+    });
+  }
 }

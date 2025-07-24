@@ -9,4 +9,4 @@ import { UsersModule } from './users/users.module'; // Importe o UsersModule
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
