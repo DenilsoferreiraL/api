@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '@prisma/client';
@@ -8,21 +8,18 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  //Método para criar um usuário e verificar se o email já existe
-  //Se existir, lança um erro
-  //Se não existir, cria o usuário com a senha criptografada
-  //E define o role como CLIENTE se não for fornecido
   async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.prisma.usuario.findFirst({
-      where: {email: createUserDto.email},
-    })
+    const existingUser = await this.prisma.usuario.findUnique({
+      where: { email: createUserDto.email },
+    });
 
-    if(existingUser){
-      throw new Error('Usuário já existe com este email.');
+    if (existingUser) {
+      throw new BadRequestException('Este email já está em uso.'); 
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.senha,10)
+    const hashedPassword = await bcrypt.hash(createUserDto.senha, 10);
 
+    // Esta linha garantirá que, se role não for fornecido no DTO, ele será CLIENTE
     const role = createUserDto.role || Role.CLIENTE;
 
     return this.prisma.usuario.create({
@@ -30,7 +27,7 @@ export class UsersService {
         nome: createUserDto.nome,
         email: createUserDto.email,
         senha: hashedPassword,
-        role: role
+        role: role,
       },
     });
   }
