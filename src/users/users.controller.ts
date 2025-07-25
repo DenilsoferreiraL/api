@@ -8,9 +8,12 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users') 
 export class UsersController {
@@ -24,13 +27,17 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll() {
+  async findAll(@Req() req: any) {
+    console.log('Usuário autenticado acessando /users:', req.user)
     return this.usersService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Req() req: any) {
+    console.log(`Usuário autenticado acessando /users/:id: ${id}`);
     return this.usersService.findOneById(id);
   }
 
