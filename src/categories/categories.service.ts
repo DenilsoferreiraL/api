@@ -29,7 +29,6 @@ export class CategoriesService {
       }
     }
 
-    
     return this.prisma.categoria.create({
       data: {
         nome,
@@ -91,20 +90,25 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    
-    await this.findOne(id);
+  await this.findOne(id); 
 
-    try {
-      return await this.prisma.categoria.delete({
-        where: { id },
-      });
-    } catch (error) {
-      
-      
-      if (error.code === 'P2003') {
-        throw new ConflictException('Não é possível remover esta categoria, pois existem produtos associados a ela.');
-      }
-      throw error; 
+  try {
+    await this.prisma.categoria.delete({
+      where: { id },
+    });
+
+    return {
+      message: 'Categoria removida com sucesso.',
+      status: 'success',
+    };
+  } catch (error) {
+    if (error.code === 'P2003') {
+      throw new ConflictException(
+        'Não é possível remover esta categoria, pois existem produtos associados a ela.',
+      );
     }
+
+    throw error;
   }
+}
 }
