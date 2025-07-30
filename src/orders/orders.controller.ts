@@ -17,9 +17,7 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-// import { Request } from 'express'; // <-- NÃO IMPORTE Request do 'express' diretamente aqui
-
-import { RequestUser } from '../auth/auth.types'; // <-- Importe a interface RequestUser
+import { RequestUser } from '../auth/auth.types'; 
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 
 // Definição de tipo para o objeto Request personalizado
