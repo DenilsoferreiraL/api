@@ -41,6 +41,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+admin-seed.ts
 
 # temp directory
 .temp
@@ -49,7 +50,7 @@ lerna-debug.log*
 # Runtime data
 pids
 *.pid
-*.seed
+seed
 *.pid.lock
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
